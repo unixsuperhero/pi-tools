@@ -22,14 +22,9 @@ set -euo pipefail
 #   ~/.config/nvim -> pi-tools/nvim
 #   ~/.pi/agent/skills -> pi-tools/skills
 ITEMS=(
-    # Add the files and folders you want to manage:
-    # "~/.zshrc"
-    # "~/.gitconfig"
-    # "~/.tmux.conf"
-    # "~/.config/nvim"
-    # "~/.pi/agent/skills"
-    # "~/.vim"
-    # "~/.ssh"
+    "~/.pi/agent/skills"
+    "~/.pi/agent/prompts"
+    "~/.pi/agent/keybindings.json"
 )
 
 # =============================================================================

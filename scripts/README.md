@@ -31,7 +31,23 @@ FOLDERS=(
     "~/.vim"          # Vim plugins and configuration
     "~/.ssh"          # SSH keys and configuration (be careful!)
 )
+
+# Custom path mappings (optional)
+CUSTOM_MAPPINGS=(
+    "~/.pi/agent/skills:skills"           # Maps to pi-tools/skills/ instead of pi-tools/home/.pi/agent/skills/
+    "~/.config/special:config/special"    # Custom mapping example
+)
 ```
+
+### Path Mapping
+
+**Default behavior:** All paths are mapped under `home/`
+- `~/.zshrc` → `pi-tools/home/.zshrc`
+- `~/.config/nvim` → `pi-tools/home/.config/nvim`
+
+**Custom mappings:** Override the default for specific paths
+- `~/.pi/agent/skills` → `pi-tools/skills/` (if mapped)
+- `~/.config/special` → `pi-tools/config/special/` (if mapped)
 
 ### Usage
 
@@ -74,13 +90,19 @@ For each configured file/folder, the script will:
 4. Rename the original to `[original].bkup.YYYYMMDD`
 5. Create a symlink from the original location to the repository
 
-### Example
+### Examples
 
+**Standard file:**
 If you configure `"~/.zshrc"`, the script will:
-
 - Copy `~/.zshrc` → `pi-tools/home/.zshrc`
 - Rename `~/.zshrc` → `~/.zshrc.bkup.20241206`
 - Create symlink: `~/.zshrc` → `/full/path/to/pi-tools/home/.zshrc`
+
+**Custom mapped folder:**
+If you configure `"~/.pi/agent/skills"` with custom mapping to `"skills"`, the script will:
+- Copy `~/.pi/agent/skills` → `pi-tools/skills/`
+- Rename `~/.pi/agent/skills` → `~/.pi/agent/skills.bkup.20241206`
+- Create symlink: `~/.pi/agent/skills` → `/full/path/to/pi-tools/skills/`
 
 ### Safety Features
 

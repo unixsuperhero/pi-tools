@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # =============================================================================
 # Setup Script - Dotfiles/Config Management
@@ -35,6 +35,15 @@ FOLDERS=(
     # "~/.config/git"
     # "~/.vim"
     # "~/.ssh"
+)
+
+# Custom path mappings - override default home/ mapping
+# Add entries in the format: "source_path:destination_path_in_repo"
+# Example: "~/.pi/agent/skills:skills"
+CUSTOM_MAPPINGS=(
+    # Add custom mappings here:
+    # "~/.pi/agent/skills:skills"
+    # "~/.config/special:config/special"
 )
 
 # =============================================================================
@@ -97,7 +106,18 @@ get_repo_relative_path() {
     local expanded_path
     expanded_path=$(expand_path "$original_path")
     
-    # Convert home path to relative path in repo
+    # Check for custom mappings first
+    local mapping
+    for mapping in "${CUSTOM_MAPPINGS[@]}"; do
+        local source_path="${mapping%:*}"
+        local dest_path="${mapping#*:}"
+        if [[ "$original_path" == "$source_path" ]]; then
+            echo "$dest_path"
+            return
+        fi
+    done
+    
+    # Default: Convert home path to relative path in repo
     # ~/.bashrc -> home/.bashrc
     # ~/.config/nvim -> home/.config/nvim
     echo "home${expanded_path#$HOME}"

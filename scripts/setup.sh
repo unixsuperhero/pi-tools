@@ -12,40 +12,24 @@
 set -euo pipefail
 
 # =============================================================================
-# CONFIGURATION - Define files and folders to manage
+# CONFIGURATION - Define items to manage
 # =============================================================================
 
-# Files to manage (use ~/ for home directory references)
-# Add the specific files you want to manage here
-FILES=(
-    # Examples (uncomment and modify as needed):
-    # "~/.bashrc"
-    # "~/.bash_profile" 
+# Items to manage (files or folders, use ~/ for home directory references)
+# Each item will be copied to the repo root using its basename
+# Examples:
+#   ~/.zshrc -> pi-tools/.zshrc
+#   ~/.config/nvim -> pi-tools/nvim
+#   ~/.pi/agent/skills -> pi-tools/skills
+ITEMS=(
+    # Add the files and folders you want to manage:
     # "~/.zshrc"
-    # "~/.vimrc"
     # "~/.gitconfig"
     # "~/.tmux.conf"
-)
-
-# Folders to manage (use ~/ for home directory references)  
-# Add the specific folders you want to manage here
-FOLDERS=(
-    # Examples (uncomment and modify as needed):
     # "~/.config/nvim"
-    # "~/.config/git"
+    # "~/.pi/agent/skills"
     # "~/.vim"
     # "~/.ssh"
-)
-
-# Custom path mappings - override default home/ mapping
-# Add entries in the format: "source_path:destination_path_in_repo"
-# Example: "~/.pi/agent/skills:skills"
-CUSTOM_MAPPINGS=(
-    # Add custom mappings here:
-    "~/.pi/agent/skills:skills"
-    "~/.pi/agent/prompts:prompts"
-    "~/.pi/agent/keybindings.json:keybindings.json"
-    # "~/.config/special:config/special"
 )
 
 # =============================================================================
@@ -108,21 +92,11 @@ get_repo_relative_path() {
     local expanded_path
     expanded_path=$(expand_path "$original_path")
     
-    # Check for custom mappings first
-    local mapping
-    for mapping in "${CUSTOM_MAPPINGS[@]}"; do
-        local source_path="${mapping%:*}"
-        local dest_path="${mapping#*:}"
-        if [[ "$original_path" == "$source_path" ]]; then
-            echo "$dest_path"
-            return
-        fi
-    done
-    
-    # Default: Convert home path to relative path in repo
-    # ~/.bashrc -> home/.bashrc
-    # ~/.config/nvim -> home/.config/nvim
-    echo "home${expanded_path#$HOME}"
+    # Use basename of the path as the destination in repo root
+    # ~/.zshrc -> .zshrc
+    # ~/.config/nvim -> nvim
+    # ~/.pi/agent/skills -> skills
+    basename "$expanded_path"
 }
 
 # Copy item to repo location
@@ -130,14 +104,6 @@ copy_to_repo() {
     local source_path="$1"
     local repo_relative_path="$2"
     local repo_dest_path="$REPO_DIR/$repo_relative_path"
-    local repo_dest_dir
-    repo_dest_dir=$(dirname "$repo_dest_path")
-    
-    # Create destination directory if it doesn't exist
-    if [[ ! -d "$repo_dest_dir" ]]; then
-        log_info "Creating directory: $repo_dest_dir"
-        mkdir -p "$repo_dest_dir"
-    fi
     
     if [[ -f "$source_path" ]]; then
         # Copy file
@@ -283,38 +249,32 @@ main() {
     local failed_items=0
     
     # Count total items
-    total_items=$((${#FILES[@]} + ${#FOLDERS[@]}))
+    total_items=${#ITEMS[@]}
     
     if [[ $total_items -eq 0 ]]; then
-        log_warning "No files or folders configured to process"
+        log_warning "No items configured to process"
         echo ""
         echo "To use this script:"
         echo "1. Edit $0"
-        echo "2. Add files to the FILES=() array"
-        echo "3. Add folders to the FOLDERS=() array"
-        echo "4. Run the script again"
+        echo "2. Add items to the ITEMS=() array"
+        echo "3. Run the script again"
         echo ""
         echo "Example:"
-        echo '  FILES=("~/.zshrc" "~/.gitconfig")'
-        echo '  FOLDERS=("~/.config/nvim" "~/.ssh")'
+        echo '  ITEMS=("~/.zshrc" "~/.config/nvim" "~/.pi/agent/skills")'
+        echo ""
+        echo "Each item will be copied to repo root using its basename:"
+        echo "  ~/.zshrc -> pi-tools/.zshrc"
+        echo "  ~/.config/nvim -> pi-tools/nvim"
+        echo "  ~/.pi/agent/skills -> pi-tools/skills"
         exit 0
     fi
     
     log_info "Processing $total_items items..."
     echo ""
     
-    # Process all files
-    for file in "${FILES[@]}"; do
-        if process_item "$file"; then
-            ((processed_items++))
-        else
-            ((failed_items++))
-        fi
-    done
-    
-    # Process all folders  
-    for folder in "${FOLDERS[@]}"; do
-        if process_item "$folder"; then
+    # Process all items
+    for item in "${ITEMS[@]}"; do
+        if process_item "$item"; then
             ((processed_items++))
         else
             ((failed_items++))
@@ -338,7 +298,7 @@ main() {
         log_success "All items processed successfully!"
         echo ""
         echo "Your original files have been:"
-        echo "1. Copied to this repo under home/"
+        echo "1. Copied to this repo root using their basename"
         echo "2. Backed up with .bkup.$TIMESTAMP suffix"
         echo "3. Replaced with symlinks to the repo versions"
         echo ""

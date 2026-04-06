@@ -2,56 +2,47 @@
 
 ## setup.sh
 
-A dotfiles/configuration management script that helps you manage your configuration files in this repository.
+A simple dotfiles/configuration management script that helps you manage your configuration files in this repository.
 
 ### How It Works
 
-1. **Copies** specified files and folders from your system to this repository
+1. **Copies** specified files and folders from your system to this repository root (using basename)
 2. **Verifies** all copies are real files/folders (not symlinks)
 3. **Backs up** the originals by renaming them with a timestamp (`.bkup.YYYYMMDD`)
 4. **Creates symlinks** from the original locations to the repository versions
 
 ### Configuration
 
-Before running the script, you need to edit `setup.sh` and specify which files and folders you want to manage:
+Edit `setup.sh` and add items to the `ITEMS=()` array:
 
 ```bash
-# Edit the arrays at the top of setup.sh:
+# Edit the array at the top of setup.sh:
 
-FILES=(
-    "~/.zshrc"        # Your shell configuration
-    "~/.gitconfig"    # Git configuration  
-    "~/.tmux.conf"    # Tmux configuration
-    "~/.vimrc"        # Vim configuration
-)
-
-FOLDERS=(
-    "~/.config/nvim"  # Neovim configuration
-    "~/.config/git"   # Git configuration directory
-    "~/.vim"          # Vim plugins and configuration
-    "~/.ssh"          # SSH keys and configuration (be careful!)
-)
-
-# Custom path mappings (optional)
-CUSTOM_MAPPINGS=(
-    "~/.pi/agent/skills:skills"           # Maps to pi-tools/skills/ instead of pi-tools/home/.pi/agent/skills/
-    "~/.config/special:config/special"    # Custom mapping example
+ITEMS=(
+    "~/.zshrc"           # Shell configuration -> pi-tools/.zshrc
+    "~/.gitconfig"       # Git configuration -> pi-tools/.gitconfig
+    "~/.tmux.conf"       # Tmux configuration -> pi-tools/.tmux.conf
+    "~/.config/nvim"     # Neovim config -> pi-tools/nvim
+    "~/.pi/agent/skills" # Pi agent skills -> pi-tools/skills
+    "~/.vim"             # Vim config -> pi-tools/.vim
+    "~/.ssh"             # SSH config -> pi-tools/.ssh (be careful!)
 )
 ```
 
 ### Path Mapping
 
-**Default behavior:** All paths are mapped under `home/`
-- `~/.zshrc` → `pi-tools/home/.zshrc`
-- `~/.config/nvim` → `pi-tools/home/.config/nvim`
+**Simple rule:** Everything goes to repo root using the basename of the path:
 
-**Custom mappings:** Override the default for specific paths
-- `~/.pi/agent/skills` → `pi-tools/skills/` (if mapped)
-- `~/.config/special` → `pi-tools/config/special/` (if mapped)
+- `~/.zshrc` → `pi-tools/.zshrc`
+- `~/.config/nvim` → `pi-tools/nvim`
+- `~/.pi/agent/skills` → `pi-tools/skills`
+- `~/.ssh` → `pi-tools/.ssh`
+
+No complex mappings needed!
 
 ### Usage
 
-1. **Edit the script** to specify your files and folders:
+1. **Edit the script** to specify your items:
    ```bash
    vim scripts/setup.sh
    # or
@@ -68,9 +59,9 @@ CUSTOM_MAPPINGS=(
 4. **Create a .gitignore** to exclude sensitive files:
    ```bash
    echo "# Sensitive files" > .gitignore
-   echo "home/.ssh/id_*" >> .gitignore
-   echo "home/.ssh/*.pub" >> .gitignore
-   echo "home/.gitconfig" >> .gitignore
+   echo ".ssh/id_*" >> .gitignore
+   echo ".ssh/*.pub" >> .gitignore
+   echo ".gitconfig" >> .gitignore
    ```
 
 5. **Commit your changes**:
@@ -80,27 +71,11 @@ CUSTOM_MAPPINGS=(
    git push
    ```
 
-### What Happens
+### Example
 
-For each configured file/folder, the script will:
+If you configure `"~/.pi/agent/skills"`, the script will:
 
-1. Check if it exists on your system
-2. Copy it to `pi-tools/home/[relative-path]`
-3. Verify the copy is a real file (not a symlink)
-4. Rename the original to `[original].bkup.YYYYMMDD`
-5. Create a symlink from the original location to the repository
-
-### Examples
-
-**Standard file:**
-If you configure `"~/.zshrc"`, the script will:
-- Copy `~/.zshrc` → `pi-tools/home/.zshrc`
-- Rename `~/.zshrc` → `~/.zshrc.bkup.20241206`
-- Create symlink: `~/.zshrc` → `/full/path/to/pi-tools/home/.zshrc`
-
-**Custom mapped folder:**
-If you configure `"~/.pi/agent/skills"` with custom mapping to `"skills"`, the script will:
-- Copy `~/.pi/agent/skills` → `pi-tools/skills/`
+- Copy `~/.pi/agent/skills/` → `pi-tools/skills/`
 - Rename `~/.pi/agent/skills` → `~/.pi/agent/skills.bkup.20241206`
 - Create symlink: `~/.pi/agent/skills` → `/full/path/to/pi-tools/skills/`
 
@@ -129,7 +104,7 @@ If you need to undo the script's changes:
 3. Clean up the repository
 
 ```bash
-# Example for .zshrc:
-rm ~/.zshrc
-mv ~/.zshrc.bkup.20241206 ~/.zshrc
+# Example for ~/.pi/agent/skills:
+rm ~/.pi/agent/skills
+mv ~/.pi/agent/skills.bkup.20241206 ~/.pi/agent/skills
 ```

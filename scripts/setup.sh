@@ -42,7 +42,9 @@ FOLDERS=(
 # Example: "~/.pi/agent/skills:skills"
 CUSTOM_MAPPINGS=(
     # Add custom mappings here:
-    # "~/.pi/agent/skills:skills"
+    "~/.pi/agent/skills:skills"
+    "~/.pi/agent/prompts:prompts"
+    "~/.pi/agent/keybindings.json:keybindings.json"
     # "~/.config/special:config/special"
 )
 
